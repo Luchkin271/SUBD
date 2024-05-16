@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../String/myString.h"
+#include "./String/myString.h"
 
 
 
@@ -9,7 +9,7 @@ struct Cell{
     struct Cell* Right;
     struct Cell* Top;
     struct Cell* Bot;
-    union value{
+    union {
         int ivalue;
         struct string* svalue;
     };
