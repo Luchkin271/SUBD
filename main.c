@@ -9,7 +9,7 @@ struct Cell{
     struct Cell* Right;
     struct Cell* Top;
     struct Cell* Bot;
-    union value{
+    union {
         int ivalue;
         struct string* svalue;
     };

@@ -15,4 +15,5 @@ struct string* stringTakeValue(struct string*,char*,int);
 struct string* printString(struct string*);
 int stringToInt(struct string*);
 struct string* InputString(char*,char);
+struct string* fprintString(FILE*, struct string*);
 #endif // MYSTRING_H_INCLUDED
