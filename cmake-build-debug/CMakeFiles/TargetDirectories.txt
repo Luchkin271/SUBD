@@ -1,0 +1,3 @@
+C:/Users/Dima/Desktop/Programs/СLionProjects/SUBD/cmake-build-debug/CMakeFiles/SUBD.dir
+C:/Users/Dima/Desktop/Programs/СLionProjects/SUBD/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Dima/Desktop/Programs/СLionProjects/SUBD/cmake-build-debug/CMakeFiles/rebuild_cache.dir

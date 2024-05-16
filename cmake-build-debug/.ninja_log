@@ -1,0 +1,7 @@
+# ninja log v5
+5	86	7376052949841023	CMakeFiles/SUBD.dir/String/myString.c.obj	d16d0ae17ea9020c
+0	88	7376052949851021	CMakeFiles/SUBD.dir/main.c.obj	26efdfb9eb1e2d2b
+94	213	7376052951041041	SUBD.exe	935399bbe5acc36c
+6	75	7376055167344025	CMakeFiles/SUBD.dir/String/myString.c.obj	d16d0ae17ea9020c
+2	86	7376055167454014	CMakeFiles/SUBD.dir/main.c.obj	26efdfb9eb1e2d2b
+86	169	7376055168254707	SUBD.exe	935399bbe5acc36c
