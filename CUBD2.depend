@@ -1,0 +1,13 @@
+# depslib dependency file v1.0
+1715875295 source:d:\myfiles\c and c++\wildproging\пока ебашит дима\cubd2\main.c
+	<stdio.h>
+	<stdlib.h>
+	"../String/myString.h"
+
+1714699335 d:\myfiles\c and c++\wildproging\пока ебашит дима\string\mystring.h
+
+1715874070 source:d:\myfiles\c and c++\wildproging\пока ебашит дима\string\mystring.c
+	<stdio.h>
+	<stdlib.h>
+	"myString.h"
+
