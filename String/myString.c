@@ -87,9 +87,8 @@ struct string* InputString( char* message, char tabulation){
     return s1;
 };
 
-struct string* fInputString(char* nameOfFile, char* message, char tabulation){
-    FILE* file1 = NULL;
-    file1 = fopen(nameOfFile,"r");
+struct string* fInputString(FILE* file1, char* message, char tabulation){
+    if(file1==NULL)return NULL;
     printf("%s", message);
     struct string* s1;
     s1=malloc(sizeof(struct string));
