@@ -261,13 +261,38 @@ int printExelToFile(struct Exel* Exel1, char* fileToPrint){
     fclose(f1);
 }
 
+struct Exel* getExelFromFile(char* fileToGet) {
+    FILE* f1 = NULL;
+    f1 = fopen( (const char*)fileToGet, "r");
+    struct Cell* bufString;
+    struct Cell* CellBuf;
+    struct string* bufString3;
+    struct Exel* Exel1;
+    Exel1 = initExel();
+    bufString = Exel1->First;
+    while ((bufString3 = fInputString(f1, '-')) != NULL) {
+        printString(bufString3);
+        if (bufString3->SizeW < 2) {
+            CellBuf = bufString;
+            bufString->Bot = initCell('n', 0, 0, bufString->Left==NULL?NULL:bufString->Left->Bot, NULL, bufString, bufString->Bot);
+            bufString = bufString->Bot;
+        } else {
+            if (CellBuf->Left != NULL) {
+                CellBuf->Right = initCell('n', 0, 0, CellBuf, CellBuf->Right, CellBuf->Top == NULL ? NULL : CellBuf->Top->Right, NULL);
+                CellBuf = CellBuf->Right;
+            }
+            AddCellValue(CellBuf, bufString3);
+
+        }
+    }
+    return Exel1;
+}
 
 int main()
 {
-
     int secst = 0;
     printf("Hello in my SUBD\n");
-    struct Exel* Exel1 = initExel();
+    struct Exel* Exel1 = getExelFromFile("txt.txt");
     while(secst!=8){
         printExel(Exel1);
         printf("Take the number of action from list:\n 1)Add a Row\n 2)Add a Collom\n 3)Set Value\n 4)Set Values\n 5)Delete a row\n 6)Delete a Collom\n 7)Save Dok\n 8)End work\n");

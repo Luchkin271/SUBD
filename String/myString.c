@@ -81,15 +81,15 @@ struct string* InputString( char* message, char tabulation){
         s1_1=realloc(s1_1,sizeof(char)*++i);
         *(s1_1+i-1)=sb;
     }
+    printf("%d\n", i+1);
     inits(s1,i+1,' ', tabulation);
     stringTakeValue(s1, s1_1, i);
     free(s1_1);
     return s1;
 };
 
-struct string* fInputString(FILE* file1, char* message, char tabulation){
+struct string* fInputString(FILE* file1, char tabulation){
     if(file1==NULL)return NULL;
-    printf("%s", message);
     struct string* s1;
     s1=malloc(sizeof(struct string));
     char* s1_1;
@@ -100,9 +100,13 @@ struct string* fInputString(FILE* file1, char* message, char tabulation){
         s1_1=realloc(s1_1,sizeof(char)*++i);
         *(s1_1+i-1)=sb;
     }
+    if (sb == EOF) {
+        free(s1_1);
+        free(s1);
+        return NULL;
+    }
     inits(s1,i+1,' ', ' ');
     stringTakeValue(s1, s1_1, i);
-    fclose(file1);
     free(s1_1);
     return s1;
 }
