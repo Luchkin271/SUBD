@@ -17,4 +17,6 @@ int stringToInt(struct string*);
 struct string* InputString(char*,char);
 struct string* fprintString(FILE*, struct string*);
 struct string* fInputString(FILE*, char);
+struct string* IntToString(int);
+struct string* sortStrings(struct string*, struct string*);
 #endif // MYSTRING_H_INCLUDED

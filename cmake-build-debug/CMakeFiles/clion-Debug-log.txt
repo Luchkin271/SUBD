@@ -5,6 +5,6 @@ CMake Warning (dev) at CMakeLists.txt:1 (project):
   both commands.
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
--- Configuring done (0.0s)
+-- Configuring done (0.1s)
 -- Generating done (0.0s)
 -- Build files have been written to: C:/Users/Dima/Desktop/Programs/СLionProjects/SUBD/cmake-build-debug
