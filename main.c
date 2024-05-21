@@ -492,7 +492,7 @@ int main()
         }
         if(secst==7){
             struct string* s1;
-            s1=InputString("Set the number of row\n", '\0');
+            s1=InputString("Set file name\n", '\0');
             printExelToFile(Exel1, s1->matrix);
         }
     }
