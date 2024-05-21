@@ -143,3 +143,29 @@ struct string* IntToString(int i){
     free(s1_1);
     return s1;
 };
+
+struct string* sortStrings(struct string* str1, struct string* str2) {
+    int minLen = (str1->SizeW < str2->SizeW) ? str1->SizeW : str2->SizeW;
+    int i = 0;
+    for (i = 0; i < minLen; i++) {
+        int charBuffer1 = (int) *(str1->matrix+i);
+        int charBuffer2 = (int) *(str2->matrix+i);
+        if (charBuffer1 > 'a' && charBuffer1 < 'z' || charBuffer1 > 'A' && charBuffer1 < 'Z') {
+            charBuffer1 += 500;
+        } else if (charBuffer1 > '0' && charBuffer1 < '9') {
+            charBuffer1 += 1000;
+        }
+
+        if (charBuffer2 > 'a' && charBuffer2 < 'z' || charBuffer2 > 'A' && charBuffer2 < 'Z') {
+            charBuffer2 += 500;
+        } else if (charBuffer2 > '0' && charBuffer2 < '9') {
+            charBuffer2 += 1000;
+        }
+
+        if (charBuffer1 > charBuffer2) return str1;
+        else if(charBuffer2 > charBuffer1) return str2;
+    }
+
+    if (str1->SizeW == minLen) return str1;
+    else return str2;
+}

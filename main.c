@@ -399,12 +399,41 @@ struct Exel* getExelFromFile(char* fileToGet) {
     return Exel1;
 }
 
+int sortExel(struct Exel* Exel1, int pos) {
+    struct Cell* firstCell = GetCellByPos(Exel1->First, pos, 0);
+    int i,j,g = 0;
+    while (firstCell != NULL) {
+        g++;
+        firstCell = firstCell->Bot;
+    }
+    g--;
+    firstCell = GetCellByPos(Exel1->First, pos, 0);
+
+    struct Cell* CellBuf1 = firstCell;
+
+    for (i=0; i < g; i++) {
+        struct Cell* CellBuf2 = CellBuf1;
+        for (j = 0; j < g-i; ++j) {
+            struct Cell* CellBuf3 = CellBuf2->Bot;
+            if (CellBuf3->valueType == 'i') {
+                swapCell(CellBuf2, CellBuf3);
+            }
+            else if (CellBuf3->valueType == 's' && CellBuf2->valueType == 's') {
+                if (CellBuf3->svalue == sortStrings(CellBuf2->svalue, CellBuf3->svalue)) {
+                    swapCell(CellBuf3, CellBuf2);
+                }
+            }
+
+        }
+    }
+}
+
 int main()
 {
     int secst = 0;
     printf("Hello in my SUBD\n");
     struct Exel* Exel1 = getExelFromFile("txt.txt");
-    while(secst!=8){
+    while(secst!=9){
         printExel(Exel1);
         printf("Take the number of action from list:\n 1)Add a Row\n 2)Add a Collom\n 3)Set Value\n 4)Set Values\n 5)Delete a row\n 6)Delete a Collom\n 7)Save Dok\n 8)End work\n");
         {
@@ -494,6 +523,12 @@ int main()
             struct string* s1;
             s1=InputString("Set file name\n", '\0');
             printExelToFile(Exel1, s1->matrix);
+        }
+        if (secst == 8) {
+            struct string* s1;
+            s1 = InputString("Set position\n", '\0');
+            int num = stringToInt(s1);
+            sortExel(Exel1, num);
         }
     }
     printExelToFile(Exel1, "txt1.txt");
