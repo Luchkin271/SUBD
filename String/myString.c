@@ -23,10 +23,10 @@ int DeleteString(struct string * s1){/*clears the string memory*/
 
 
 struct string* AddStrings(struct string * string1, struct string * string2, int Pos){/*the function puts string2 in string1 starting from position*/
-    string1->SizeW=Pos+string2->SizeW;
+    string1->SizeW=Pos+string2->SizeW>string1->SizeW?Pos+string2->SizeW:string1->SizeW;
     string1->matrix = realloc(string1->matrix, sizeof(char)*string1->SizeW);
     int i;
-    for(i=Pos;i<string1->SizeW;i++)
+    for(i=Pos;i<Pos+string2->SizeW;i++)
         *(string1->matrix+i)=*(string2->matrix+i-Pos)==string2->background?string1->background:*(string2->matrix+i-Pos);
     *(string1->matrix+string1->SizeW-1)=string1->tabulation;
 
@@ -81,7 +81,6 @@ struct string* InputString( char* message, char tabulation){
         s1_1=realloc(s1_1,sizeof(char)*++i);
         *(s1_1+i-1)=sb;
     }
-    printf("%d\n", i+1);
     inits(s1,i+1,' ', tabulation);
     stringTakeValue(s1, s1_1, i);
     free(s1_1);
@@ -118,4 +117,29 @@ struct string* fprintString(FILE* file1, struct string *string1){
         if(*(string1->matrix+i)!=string1->tabulation)
             fprintf(file1,"%c",*(string1->matrix+i));
     return string1;
+};
+
+struct string* IntToString(int i){
+    struct string* s1;
+    s1=malloc(sizeof(struct string));
+    char* s1_1;
+    s1_1=malloc(sizeof(char));
+    char sb;
+    int j=0;
+    while(i>0){
+        sb = i%10+'0';
+        i/=10;
+        s1_1=realloc(s1_1,sizeof(char)*++j);
+        *(s1_1+j-1)=sb;
+    }
+    while(i<(j+1)/2){
+        int a = *(s1_1+j-1-i);
+        *(s1_1+j-1-i) = *(s1_1+i);
+        *(s1_1+i)= a;
+        i++;
+    }
+    inits(s1,j+1,' ', ' ');
+    stringTakeValue(s1, s1_1, j);
+    free(s1_1);
+    return s1;
 };

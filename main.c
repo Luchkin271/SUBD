@@ -14,9 +14,13 @@ struct Cell{
         struct string* svalue;
     };
     char valueType;
+    int SizeW;
 };
 struct Cell* initCell(char valueType,void* value, int len, struct Cell* Left, struct Cell* Right, struct Cell* Top, struct Cell* Bot){
     struct Cell* NewCell = malloc(sizeof(struct Cell));
+    NewCell->SizeW=0;
+    if(Top!=NULL)NewCell->SizeW=Top->SizeW;
+    else if(Bot!=NULL)NewCell->SizeW=Bot->SizeW;
     NewCell->Left = Left;
     if(Left!=NULL)Left->Right = NewCell;
     NewCell->Right = Right;
@@ -26,8 +30,12 @@ struct Cell* initCell(char valueType,void* value, int len, struct Cell* Left, st
     NewCell->Bot = Bot;
     if(Bot!=NULL)Bot->Top = NewCell;
     NewCell->valueType = valueType;
-    if(valueType=='i') NewCell->ivalue = *((int *)value);
-    if(valueType=='c'){
+    if(valueType=='i'&&NewCell->Top!=NULL){
+        NewCell->ivalue = *((int *)value);
+        len=1;
+        while(*((int *)value)/=10)len+=1;
+    }
+    else if(valueType=='c'){
         NewCell->valueType = 's';
         struct string* string1;
         string1 = malloc(sizeof(struct string));
@@ -35,8 +43,18 @@ struct Cell* initCell(char valueType,void* value, int len, struct Cell* Left, st
         stringTakeValue(string1, (char*)value, len);
         NewCell->svalue = string1;
     }
-    if(valueType=='s'){
+    else if(valueType=='s'){
         NewCell->svalue = ((struct string*)value);
+        len = NewCell->svalue->SizeW;
+    }
+    else if(valueType=='n')len=5;
+    struct Cell* Buff = NewCell;
+    if(len>Buff->SizeW){
+        while(Buff->Top!=NULL)Buff=Buff->Top;
+        while(Buff!=NULL){
+            Buff->SizeW = len;
+            Buff=Buff->Bot;
+        }
     }
     return NewCell;
 }
@@ -65,10 +83,24 @@ struct Cell* swapCell(struct Cell*Cell1, struct Cell*Cell2){
 };
 
 int PrintCell(struct Cell*Cell1){
+    if(Cell1->SizeW<1){
+        if(Cell1->valueType=='n')printf(" none ");
+        return 0;
+    }
+    struct string* s1;
+    s1=malloc(sizeof(struct string));
+    inits(s1,Cell1->SizeW,' ', ' ');
     if(Cell1==NULL)return -1;
-    if(Cell1->valueType=='i')printf("%d ", Cell1->ivalue);
-    if(Cell1->valueType=='s')printString(Cell1->svalue);
-    if(Cell1->valueType=='n')printf(" none ");
+    if(Cell1->valueType=='i'){
+        struct string* s2;
+        s2=IntToString(Cell1->ivalue);
+        AddStrings(s1,s2, Cell1->SizeW-s2->SizeW);
+        free(s2);
+    }
+    if(Cell1->valueType=='s')AddStrings(s1,Cell1->svalue, (Cell1->SizeW-Cell1->svalue->SizeW+1)/2);
+    if(Cell1->valueType=='n')stringTakeValue(s1,"none", 4);
+    printString(s1);
+    free(s1);
 }
 int deleteCell(struct Cell*Cell1){
     if(Cell1!=NULL){
@@ -111,12 +143,14 @@ struct Cell * GetCellByPos(struct Cell * root, int x, int y){
 };
 
 int AddCellValue(struct Cell * root, struct string * value){
+    if(root->Top!=NULL)root->SizeW=root->Top->SizeW>root->SizeW?root->Bot->SizeW:root->SizeW;
+    else if(root->Bot!=NULL)root->SizeW=root->SizeW<root->Bot->SizeW?root->Bot->SizeW:root->SizeW;
     if(root->valueType=='s')DeleteString(root->svalue);
     if(stringToInt(value)==0&&*(value->matrix)==value->tabulation){
         root->valueType='n';
         return 0;
     }
-    if(*(value->matrix)>='0'&&*(value->matrix)<='9'){
+    if(*(value->matrix)>='0'&&*(value->matrix)<='9'&&root->Top!=NULL){
                 root->valueType='i';
                 root->ivalue = stringToInt(value);
                 DeleteString(value);
@@ -125,6 +159,14 @@ int AddCellValue(struct Cell * root, struct string * value){
     else{
             root->valueType='s';
             root->svalue = value;
+    }
+    struct Cell* Buff = root;
+    if(value->SizeW>Buff->SizeW){
+        while(Buff->Top!=NULL)Buff=Buff->Top;
+        while(Buff!=NULL){
+            Buff->SizeW = value->SizeW;
+            Buff=Buff->Bot;
+        }
     }
     return 1;
 }
@@ -229,17 +271,85 @@ struct Exel* deleteCollom(struct Exel* Exel1, int Pos){
 };
 
 int printExel(struct Exel* Exel1){
+    int i =0, j=1, g=1;
+    char N[4]={-55,-51,-69,-53};
+    struct string *Num;
+    Num = malloc(sizeof(struct string));
     struct Cell *BufCell1 = Exel1->First;
     while(BufCell1!=NULL){
-        struct Cell *BufCell2 = BufCell1;
+        j++;
         BufCell1 = BufCell1->Bot;
+    }
+    Num = inits(Num,j+2,' ',' ');
+    BufCell1 = Exel1->First;
+    {
+        printf("%c",N[0]);
+        for(i=0;i<Num->SizeW;i++)printf("%c",N[1]);
+        printf("%c",N[3]);
+        struct Cell *BufCell2 = BufCell1;
+        while(BufCell2!=NULL){
+            for(i=0;i<BufCell2->SizeW;i++)printf("%c",N[1]);
+            if(BufCell2->Right==NULL)printf("%c",N[2]);
+            else printf("%c",N[3]);
+            BufCell2 = BufCell2->Right;
+        }
+        printf("\n");
+        struct string* s2;
+        s2=IntToString(g++);
+        AddStrings(Num,s2, Num->SizeW-s2->SizeW);
+        free(s2);
+    }
+    char N2[4]={-52,-51,-71,-50};
+    char N3[4]={-56,-51,-68,-54};
+    while(BufCell1!=NULL){
+        struct Cell *BufCell2 = BufCell1;
+        printf("%c",-70);
+        if(BufCell1->Top!=NULL){
+            printString(Num);
+            struct string* s2;
+            s2=IntToString(g++);
+            AddStrings(Num,s2, Num->SizeW-s2->SizeW);
+            free(s2);
+        }
+        else {
+            printf("Nam");
+            for(i=0;i<Num->SizeW-3;i++)printf("%c",' ');
+        }
+        printf("%c",-70);
         while(BufCell2!=NULL){
             struct Cell *BufCell3 = BufCell2;
             BufCell2 = BufCell2->Right;
             PrintCell(BufCell3);
+            printf("%c",-70);
         }
         printf("\n");
+        BufCell2 = BufCell1;
+        if(BufCell1->Bot!=NULL){
+            printf("%c",N2[0]);
+            for(i=0;i<Num->SizeW;i++)printf("%c",N2[1]);
+            printf("%c",N2[3]);
+            while(BufCell2!=NULL){
+                for(i=0;i<BufCell2->SizeW;i++)printf("%c",N2[1]);
+                if(BufCell2->Right==NULL)printf("%c",N2[2]);
+                else printf("%c",N2[3]);
+                BufCell2 = BufCell2->Right;
+            }
+        }
+        else{
+            printf("%c",N3[0]);
+            for(i=0;i<Num->SizeW;i++)printf("%c",N3[1]);
+            printf("%c",N3[3]);
+            while(BufCell2!=NULL){
+                for(i=0;i<BufCell2->SizeW;i++)printf("%c",N3[1]);
+                if(BufCell2->Right==NULL)printf("%c",N3[2]);
+                else printf("%c",N3[3]);
+                BufCell2 = BufCell2->Right;
+            }
+        }
+        BufCell1 = BufCell1->Bot;
+        printf("\n");
     }
+    DeleteString(Num);
 }
 
 int printExelToFile(struct Exel* Exel1, char* fileToPrint){
@@ -264,25 +374,26 @@ int printExelToFile(struct Exel* Exel1, char* fileToPrint){
 struct Exel* getExelFromFile(char* fileToGet) {
     FILE* f1 = NULL;
     f1 = fopen( (const char*)fileToGet, "r");
-    struct Cell* bufString;
+    struct Cell* CellBuf1;
     struct Cell* CellBuf;
     struct string* bufString3;
     struct Exel* Exel1;
     Exel1 = initExel();
-    bufString = Exel1->First;
+    CellBuf1 = Exel1->First;
     while ((bufString3 = fInputString(f1, '-')) != NULL) {
-        printString(bufString3);
-        if (bufString3->SizeW < 2) {
-            CellBuf = bufString;
-            bufString->Bot = initCell('n', 0, 0, bufString->Left==NULL?NULL:bufString->Left->Bot, NULL, bufString, bufString->Bot);
-            bufString = bufString->Bot;
-        } else {
-            if (CellBuf->Left != NULL) {
+        if (bufString3->SizeW > 1){
+            if (CellBuf1->valueType!='n') {
                 CellBuf->Right = initCell('n', 0, 0, CellBuf, CellBuf->Right, CellBuf->Top == NULL ? NULL : CellBuf->Top->Right, NULL);
                 CellBuf = CellBuf->Right;
             }
             AddCellValue(CellBuf, bufString3);
 
+        } else {
+            if(CellBuf1->valueType!='n'){
+                CellBuf1->Bot = initCell('n', 0, 0, CellBuf1->Left==NULL?NULL:CellBuf1->Left->Bot, NULL, CellBuf1, CellBuf1->Bot);
+                CellBuf1 = CellBuf1->Bot;
+            }
+            CellBuf = CellBuf1;
         }
     }
     return Exel1;
@@ -335,29 +446,28 @@ int main()
             do{
             free(s1);
             s1 = InputString("Set the value\n",' ');
-            }while(AddCellValue(GetCellByPos(Exel1->First, Nam-1, Nam2-1),s1)==0);
+            }while(AddCellValue(GetCellByPos(Exel1->First, Nam2-1, Nam-1),s1)==0);
         }
         if(secst==4){
             int Nam=0,Nam2=0,Nam3=0,Nam4=0, i,j;
             struct string* s1;
-            s1=InputString("Set the row number of Start Cell\n", '/n');
+            s1=InputString("Set the row number of start Cell\n", '/n');
             Nam = stringToInt(s1);
             free(s1);
-            s1=InputString("Set the collom number of Start Cell\n", '/n');
+            s1=InputString("Set the collom number of start Cell\n", '/n');
             Nam2 = stringToInt(s1);
             free(s1);
-            s1=InputString("Set the row number of Start Cell\n", '/n');
+            s1=InputString("Set the row number of end Cell\n", '/n');
             Nam3 = stringToInt(s1);
             free(s1);
-            s1=InputString("Set the collom number of Start Cell\n", '/n');
+            s1=InputString("Set the collom number of end Cell\n", '/n');
             Nam4 = stringToInt(s1);
             for(;Nam2<=Nam4;Nam2++){
-                int j=Nam;
-                for(;j<=Nam3;j++){
+                for(j=Nam;j<=Nam3;j++){
                     do{
                     free(s1);
                     s1 = InputString("Set the value\n",' ');
-                    }while(AddCellValue(GetCellByPos(Exel1->First, j-1, Nam2-1),s1)==0);
+                    }while(AddCellValue(GetCellByPos(Exel1->First, Nam2-1, j-1),s1)==0);
                 }
             }
         }
