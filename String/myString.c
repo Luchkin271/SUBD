@@ -7,7 +7,8 @@ struct string* inits(struct string *string1, int SizeW, char background, char ta
     string1->SizeW = SizeW;
     string1->background = background;
     string1->tabulation = tabulation;
-    string1->matrix = calloc(string1->SizeW, sizeof(char));
+    string1->matrix = NULL;
+    while(string1->matrix == NULL)string1->matrix = calloc(string1->SizeW, sizeof(char));
     int i;
     for(i=0;i<string1->SizeW;i++)
         *(string1->matrix+i) = i!=string1->SizeW-1?background:string1->tabulation;

@@ -105,6 +105,7 @@ int PrintCell(struct Cell*Cell1){
 int deleteCell(struct Cell*Cell1){
     if(Cell1!=NULL){
         if(Cell1->valueType=='s'&&Cell1->svalue!=NULL){
+            DeleteString(Cell1->svalue);
             free(Cell1->svalue);
         }
         free(Cell1);
@@ -143,14 +144,16 @@ struct Cell * GetCellByPos(struct Cell * root, int x, int y){
 };
 
 int AddCellValue(struct Cell * root, struct string * value){
-    if(root->Top!=NULL)root->SizeW=root->Top->SizeW>root->SizeW?root->Bot->SizeW:root->SizeW;
-    else if(root->Bot!=NULL)root->SizeW=root->SizeW<root->Bot->SizeW?root->Bot->SizeW:root->SizeW;
-    if(root->valueType=='s')DeleteString(root->svalue);
+    if(root->valueType=='s'){
+        DeleteString(root->svalue);
+        free(root->svalue);
+    }
     if(stringToInt(value)==0&&*(value->matrix)==value->tabulation){
         root->valueType='n';
+        printf("none\n");
         return 0;
     }
-    if(*(value->matrix)>='0'&&*(value->matrix)<='9'&&root->Top!=NULL){
+    if(*(value->matrix)>='0'&&*(value->matrix)<='9'){
                 root->valueType='i';
                 root->ivalue = stringToInt(value);
                 DeleteString(value);
@@ -232,6 +235,7 @@ struct Exel* deleteRow(struct Exel* Exel1, int Pos){
             struct Cell * CellBuf1 = CellBuf->Bot->Bot;
             deleteCell(CellBuf->Bot);
             CellBuf->Bot=CellBuf1;
+            if(CellBuf1!=NULL)CellBuf1->Top = CellBuf;
             CellBuf=CellBuf->Right;
         }
     }
@@ -259,7 +263,8 @@ struct Exel* deleteCollom(struct Exel* Exel1, int Pos){
         while(CellBuf!=NULL&&CellBuf->Right!=NULL){
             struct Cell * CellBuf1 = CellBuf->Right->Right;
             deleteCell(CellBuf->Right);
-            CellBuf->Right=CellBuf1;
+            CellBuf->Right = CellBuf1;
+            if(CellBuf1!=NULL)CellBuf1->Left = CellBuf;
             CellBuf=CellBuf->Bot;
         }
     }
@@ -357,13 +362,13 @@ int printExelToFile(struct Exel* Exel1, char* fileToPrint){
     f1 = fopen((const char*)fileToPrint, "w");
     struct Cell * BufCell1 = Exel1->First;
     while(BufCell1!=NULL){
-        fprintf(f1,"-");
+        fprintf(f1,"/");
         struct Cell * BufCell2 = BufCell1;
         while(BufCell2!=NULL){
             if(BufCell2->valueType=='s')fprintString(f1,BufCell2->svalue);
             if(BufCell2->valueType=='i')fprintf(f1,"%d",BufCell2->ivalue);
             if(BufCell2->valueType=='n')fprintf(f1,"none");
-            fprintf(f1,"-");
+            fprintf(f1,"/");
             BufCell2=BufCell2->Right;
         }
         BufCell1=BufCell1->Bot;
@@ -380,7 +385,7 @@ struct Exel* getExelFromFile(char* fileToGet) {
     struct Exel* Exel1;
     Exel1 = initExel();
     CellBuf1 = Exel1->First;
-    while ((bufString3 = fInputString(f1, '-')) != NULL) {
+    while ((bufString3 = fInputString(f1, '/')) != NULL) {
         if (bufString3->SizeW > 1){
             if (CellBuf1->valueType!='n') {
                 CellBuf->Right = initCell('n', 0, 0, CellBuf, CellBuf->Right, CellBuf->Top == NULL ? NULL : CellBuf->Top->Right, NULL);
@@ -394,6 +399,7 @@ struct Exel* getExelFromFile(char* fileToGet) {
                 CellBuf1 = CellBuf1->Bot;
             }
             CellBuf = CellBuf1;
+
         }
     }
     return Exel1;
@@ -435,7 +441,7 @@ int main()
     struct Exel* Exel1 = getExelFromFile("txt.txt");
     while(secst!=9){
         printExel(Exel1);
-        printf("Take the number of action from list:\n 1)Add a Row\n 2)Add a Collom\n 3)Set Value\n 4)Set Values\n 5)Delete a row\n 6)Delete a Collom\n 7)Save Dok\n 8)End work\n");
+        printf("Take the number of action from list:\n 1)Add a Row\n 2)Add a Collom\n 3)Set Value\n 4)Set Values\n 5)Delete a row\n 6)Delete a Collom\n 7)Save Dok\n 9)End work\n");
         {
             struct string* s1;
             s1=InputString("", '/n');
@@ -465,38 +471,57 @@ int main()
             Exel1 = addCollom(Exel1, Nam);
         }
         if(secst==3){
-            int Nam=0,Nam2=0;
+            int Nam1=0,Nam2=0;
             struct string* s1;
-            s1=InputString("Set the number of row\n", '/n');
-            Nam = stringToInt(s1);
+            s1 = InputString("Set the number of row\n", '/n');
+            Nam1 = stringToInt(s1);
+            DeleteString(s1);
             free(s1);
-            s1=InputString("Set the number of Collom\n", '/n');
+            s1 = InputString("Set the number of Collom\n", '/n');
             Nam2 = stringToInt(s1);
-            do{
+            DeleteString(s1);
             free(s1);
-            s1 = InputString("Set the value\n",' ');
-            }while(AddCellValue(GetCellByPos(Exel1->First, Nam2-1, Nam-1),s1)==0);
+            int f=0;
+            while(f==0){
+                s1 = InputString("Set the value\n",' ');
+                f = AddCellValue(GetCellByPos(Exel1->First, Nam2-1, Nam1),s1);
+                if(f==0){
+                    DeleteString(s1);
+                    free(s1);
+                }
+            }
         }
         if(secst==4){
-            int Nam=0,Nam2=0,Nam3=0,Nam4=0, i,j;
+            int Nam1=0,Nam2=0,Nam3=0,Nam4=0, i,j;
             struct string* s1;
             s1=InputString("Set the row number of start Cell\n", '/n');
-            Nam = stringToInt(s1);
+            Nam1 = stringToInt(s1);
+            DeleteString(s1);
             free(s1);
             s1=InputString("Set the collom number of start Cell\n", '/n');
             Nam2 = stringToInt(s1);
+            DeleteString(s1);
             free(s1);
             s1=InputString("Set the row number of end Cell\n", '/n');
             Nam3 = stringToInt(s1);
+            DeleteString(s1);
             free(s1);
             s1=InputString("Set the collom number of end Cell\n", '/n');
             Nam4 = stringToInt(s1);
-            for(;Nam2<=Nam4;Nam2++){
-                for(j=Nam;j<=Nam3;j++){
-                    do{
-                    free(s1);
-                    s1 = InputString("Set the value\n",' ');
-                    }while(AddCellValue(GetCellByPos(Exel1->First, Nam2-1, j-1),s1)==0);
+            DeleteString(s1);
+            free(s1);
+            for(i=Nam1;i<=Nam3;i++){
+                for(j=Nam2;j<=Nam4;j++){
+                    int f=0;
+                    while(f==0){
+                        s1 = InputString("Set the value\n",' ');
+                        f = AddCellValue(GetCellByPos(Exel1->First, j-1, i),s1);
+                        if(f==0){
+                            DeleteString(s1);
+                            free(s1);
+                        }
+                    }
+
                 }
             }
         }
@@ -506,7 +531,7 @@ int main()
             s1=InputString("Set the namber of row\n", '/n');
             Nam = stringToInt(s1);
             free(s1);
-            Exel1 = deleteRow(Exel1, Nam);
+            Exel1 = deleteRow(Exel1, Nam+1);
         }
         if(secst==6){
             int Nam=0;
@@ -530,8 +555,9 @@ int main()
             int num = stringToInt(s1);
             sortExel(Exel1, num);
         }
+        printf("Your mas\n");
     }
-    printExelToFile(Exel1, "txt1.txt");
+    printExelToFile(Exel1, "txt.txt");
     deleteExel(Exel1);
     return 0;
 }
