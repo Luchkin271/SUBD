@@ -19,6 +19,7 @@ struct string* inits(struct string *string1, int SizeW, char background, char ta
 int DeleteString(struct string * s1){/*clears the string memory*/
     if(s1->matrix!=NULL)free(s1->matrix);
     s1->matrix=NULL;
+    free(s1);
     return 0;
 }
 
@@ -36,19 +37,20 @@ struct string* AddStrings(struct string * string1, struct string * string2, int 
 
 
 struct string* stringTakeValue(struct string *string1, char* value, int len){/*the function overwrites the old value with the background and places the new value*/
-    struct string string3;
-    string3.SizeW=len+1;
-    string3.background = ' ';
-    string3.tabulation = string1->tabulation;
+    struct string *string3 = NULL;
+    while (string3 == NULL) string3 = malloc(sizeof (struct string));
+    string3->SizeW=len+1;
+    string3->background = ' ';
+    string3->tabulation = string1->tabulation;
     int i;
     for(i=0;i<string1->SizeW;i++)
         *(string1->matrix+i) = i!=string1->SizeW-1?string1->background:string1->tabulation;
-    string3.matrix = calloc(len,sizeof(char));
+    string3->matrix = calloc(len,sizeof(char));
     for(i=0;i<len;i++)
-        *(string3.matrix+i)= *(value+i);
-    *(string3.matrix+len)=string1->tabulation;
-    AddStrings(string1, &string3, string1->SizeW-len-1);
-    DeleteString(&string3);
+        *(string3->matrix+i)= *(value+i);
+    *(string3->matrix+len)=string1->tabulation;
+    AddStrings(string1, string3, string1->SizeW-len-1);
+    DeleteString(string3);
     return string1;
 };
 
@@ -91,9 +93,11 @@ struct string* InputString( char* message, char tabulation){
 struct string* fInputString(FILE* file1, char tabulation){
     if(file1==NULL)return NULL;
     struct string* s1;
-    s1=malloc(sizeof(struct string));
+    s1=NULL;
+    while (s1==NULL) s1 = malloc(sizeof(struct string));
     char* s1_1;
-    s1_1=malloc(sizeof(char));
+    s1_1=NULL;
+    while (s1_1==NULL) s1_1 = malloc(sizeof(char));
     char sb;
     int i=0;
     while((sb=fgetc(file1))!=tabulation&&sb!=EOF){
@@ -148,9 +152,21 @@ struct string* IntToString(int i){
 struct string* sortStrings(struct string* str1, struct string* str2) {
     int minLen = (str1->SizeW < str2->SizeW) ? str1->SizeW : str2->SizeW;
     int i = 0;
+    int flag = (str1->SizeW < str2->SizeW) ? 0 : 1;
     for (i = 0; i < minLen; i++) {
-        int charBuffer1 = (int) *(str1->matrix+i);
-        int charBuffer2 = (int) *(str2->matrix+i);
+        int j = 0, k = 0;
+        int charBuffer1 = (int) *(str1->matrix+i+j);
+        int charBuffer2 = (int) *(str2->matrix+i+k);
+        while (charBuffer1 == str1->background) {
+            charBuffer1 = (int) *(str1->matrix+i+j);
+            ++j;
+        }
+        while (charBuffer1 == str1->background) {
+            charBuffer1 = (int) *(str2->matrix+i+k);
+            ++k;
+        }
+        printf("%d %d\n", charBuffer1, charBuffer2);
+
         if (charBuffer1 > 'a' && charBuffer1 < 'z' || charBuffer1 > 'A' && charBuffer1 < 'Z') {
             charBuffer1 += 500;
         } else if (charBuffer1 > '0' && charBuffer1 < '9') {

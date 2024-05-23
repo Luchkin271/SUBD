@@ -17,7 +17,8 @@ struct Cell{
     int SizeW;
 };
 struct Cell* initCell(char valueType,void* value, int len, struct Cell* Left, struct Cell* Right, struct Cell* Top, struct Cell* Bot){
-    struct Cell* NewCell = malloc(sizeof(struct Cell));
+    struct Cell* NewCell = NULL;
+    while(NewCell == NULL) NewCell = malloc(sizeof(struct Cell));
     NewCell->SizeW=0;
     if(Top!=NULL)NewCell->SizeW=Top->SizeW;
     else if(Bot!=NULL)NewCell->SizeW=Bot->SizeW;
@@ -65,17 +66,17 @@ struct Cell* swapCell(struct Cell*Cell1, struct Cell*Cell2){
         Cell1->valueType = Cell2->valueType;
         if(Cell1->valueType=='i')
             Cell1->ivalue = Cell2->ivalue;
-        if(Cell1->valueType=='s')
+        else if(Cell1->valueType=='s')
             Cell1->svalue = Cell2->svalue;
         Cell2->valueType = 'i';
         Cell2->ivalue = buf;
     }
-    if(Cell1->valueType=='s'){
+    else if(Cell1->valueType=='s'){
         struct string* buf = Cell1->svalue;
         Cell1->valueType = Cell2->valueType;
         if(Cell1->valueType=='i')
             Cell1->ivalue = Cell2->ivalue;
-        if(Cell1->valueType=='s')
+        else if(Cell1->valueType=='s')
             Cell1->svalue = Cell2->svalue;
         Cell2->valueType = 's';
         Cell2->svalue = buf;
@@ -106,7 +107,6 @@ int deleteCell(struct Cell*Cell1){
     if(Cell1!=NULL){
         if(Cell1->valueType=='s'&&Cell1->svalue!=NULL){
             DeleteString(Cell1->svalue);
-            free(Cell1->svalue);
         }
         free(Cell1);
     }
@@ -118,7 +118,8 @@ struct Exel{
 };
 
 struct Exel* initExel(){
-    struct Exel* Exel1 = malloc(sizeof(struct Exel));
+    struct Exel* Exel1 = NULL;
+    while(Exel1 == NULL) Exel1 = malloc(sizeof(struct Exel));
     Exel1->First=Exel1->Last=initCell('n', NULL, 0,NULL,NULL,NULL,NULL);
     return Exel1;
 };
@@ -132,13 +133,14 @@ struct Exel* deleteExel(struct Exel* Exel1){
             if(BufCell2!=NULL)deleteCell(BufCell2);
         }
     }
+    free(Exel1);
 };
-struct Cell * GetCellByPos(struct Cell * root, int x, int y){
+struct Cell * getCellByPos(struct Cell * root, int x, int y){
     if(x!=0||y!=0){
-        if(x<0 && root->Left!=NULL)root = GetCellByPos(root->Left, x+=1, y);
-        else if(x>0 && root->Right!=NULL)root = GetCellByPos(root->Right, x-=1, y);
-        else if(y<0 && root->Top!=NULL)root = GetCellByPos(root->Top, x, y+=1);
-        else if(y>0 && root->Bot!=NULL)root = GetCellByPos(root->Bot, x, y-=1);
+        if(x<0 && root->Left!=NULL)root = getCellByPos(root->Left, x += 1, y);
+        else if(x>0 && root->Right!=NULL)root = getCellByPos(root->Right, x -= 1, y);
+        else if(y<0 && root->Top!=NULL)root = getCellByPos(root->Top, x, y += 1);
+        else if(y>0 && root->Bot!=NULL)root = getCellByPos(root->Bot, x, y -= 1);
     }
     return root;
 };
@@ -146,7 +148,6 @@ struct Cell * GetCellByPos(struct Cell * root, int x, int y){
 int AddCellValue(struct Cell * root, struct string * value){
     if(root->valueType=='s'){
         DeleteString(root->svalue);
-        free(root->svalue);
     }
     if(stringToInt(value)==0&&*(value->matrix)==value->tabulation){
         root->valueType='n';
@@ -175,7 +176,7 @@ int AddCellValue(struct Cell * root, struct string * value){
 }
 
 struct Exel* addRow(struct Exel* Exel1, int Pos){
-    struct Cell * CellBuf = GetCellByPos(Exel1->First, 0, Pos-1);
+    struct Cell * CellBuf = getCellByPos(Exel1->First, 0, Pos - 1);
     if(Pos<1){
 
         while(CellBuf!=NULL){
@@ -189,14 +190,14 @@ struct Exel* addRow(struct Exel* Exel1, int Pos){
             CellBuf=CellBuf->Right;
         }
     }
-    while(Exel1->First->Top!=NULL)Exel1->First=GetCellByPos(Exel1->First, 0, -1);
-    while(Exel1->First->Left!=NULL)Exel1->First=GetCellByPos(Exel1->First, -1, 0);
-    while(Exel1->Last->Bot!=NULL)Exel1->Last=GetCellByPos(Exel1->Last, 0, 1);
-    while(Exel1->Last->Right!=NULL)Exel1->Last=GetCellByPos(Exel1->Last, 1, 0);
+    while(Exel1->First->Top!=NULL)Exel1->First= getCellByPos(Exel1->First, 0, -1);
+    while(Exel1->First->Left!=NULL)Exel1->First= getCellByPos(Exel1->First, -1, 0);
+    while(Exel1->Last->Bot!=NULL)Exel1->Last= getCellByPos(Exel1->Last, 0, 1);
+    while(Exel1->Last->Right!=NULL)Exel1->Last= getCellByPos(Exel1->Last, 1, 0);
     return Exel1;
 };
 struct Exel* addCollom(struct Exel* Exel1, int Pos){
-    struct Cell * CellBuf = GetCellByPos(Exel1->First, Pos-1, 0);
+    struct Cell * CellBuf = getCellByPos(Exel1->First, Pos - 1, 0);
     if(Pos<1){
 
         while(CellBuf!=NULL){
@@ -210,14 +211,14 @@ struct Exel* addCollom(struct Exel* Exel1, int Pos){
             CellBuf=CellBuf->Bot;
         }
     }
-    while(Exel1->First->Top!=NULL)Exel1->First=GetCellByPos(Exel1->First, 0, -1);
-    while(Exel1->First->Left!=NULL)Exel1->First=GetCellByPos(Exel1->First, -1, 0);
-    while(Exel1->Last->Bot!=NULL)Exel1->Last=GetCellByPos(Exel1->Last, 0, 1);
-    while(Exel1->Last->Right!=NULL)Exel1->Last=GetCellByPos(Exel1->Last, 1, 0);
+    while(Exel1->First->Top!=NULL)Exel1->First= getCellByPos(Exel1->First, 0, -1);
+    while(Exel1->First->Left!=NULL)Exel1->First= getCellByPos(Exel1->First, -1, 0);
+    while(Exel1->Last->Bot!=NULL)Exel1->Last= getCellByPos(Exel1->Last, 0, 1);
+    while(Exel1->Last->Right!=NULL)Exel1->Last= getCellByPos(Exel1->Last, 1, 0);
     return Exel1;
 };
 struct Exel* deleteRow(struct Exel* Exel1, int Pos){
-    struct Cell * CellBuf = GetCellByPos(Exel1->First, 0, Pos-1);
+    struct Cell * CellBuf = getCellByPos(Exel1->First, 0, Pos - 1);
     if(Pos<2){
         if(CellBuf->Bot!=NULL)Exel1->First=CellBuf->Bot;
         CellBuf=CellBuf->Bot;
@@ -239,14 +240,14 @@ struct Exel* deleteRow(struct Exel* Exel1, int Pos){
             CellBuf=CellBuf->Right;
         }
     }
-    while(Exel1->First->Top!=NULL)Exel1->First=GetCellByPos(Exel1->First, 0, -1);
-    while(Exel1->First->Left!=NULL)Exel1->First=GetCellByPos(Exel1->First, -1, 0);
-    while(Exel1->Last->Bot!=NULL)Exel1->Last=GetCellByPos(Exel1->Last, 0, 1);
-    while(Exel1->Last->Right!=NULL)Exel1->Last=GetCellByPos(Exel1->Last, 1, 0);
+    while(Exel1->First->Top!=NULL)Exel1->First= getCellByPos(Exel1->First, 0, -1);
+    while(Exel1->First->Left!=NULL)Exel1->First= getCellByPos(Exel1->First, -1, 0);
+    while(Exel1->Last->Bot!=NULL)Exel1->Last= getCellByPos(Exel1->Last, 0, 1);
+    while(Exel1->Last->Right!=NULL)Exel1->Last= getCellByPos(Exel1->Last, 1, 0);
     return Exel1;
 };
 struct Exel* deleteCollom(struct Exel* Exel1, int Pos){
-    struct Cell * CellBuf = GetCellByPos(Exel1->First, Pos-1, 0);
+    struct Cell * CellBuf = getCellByPos(Exel1->First, Pos - 1, 0);
     if(Pos<2){
         if(CellBuf->Right!=NULL)Exel1->First=CellBuf->Right;
         CellBuf=CellBuf->Right;
@@ -268,10 +269,10 @@ struct Exel* deleteCollom(struct Exel* Exel1, int Pos){
             CellBuf=CellBuf->Bot;
         }
     }
-    while(Exel1->First->Top!=NULL)Exel1->First=GetCellByPos(Exel1->First, 0, -1);
-    while(Exel1->First->Left!=NULL)Exel1->First=GetCellByPos(Exel1->First, -1, 0);
-    while(Exel1->Last->Bot!=NULL)Exel1->Last=GetCellByPos(Exel1->Last, 0, 1);
-    while(Exel1->Last->Right!=NULL)Exel1->Last=GetCellByPos(Exel1->Last, 1, 0);
+    while(Exel1->First->Top!=NULL)Exel1->First= getCellByPos(Exel1->First, 0, -1);
+    while(Exel1->First->Left!=NULL)Exel1->First= getCellByPos(Exel1->First, -1, 0);
+    while(Exel1->Last->Bot!=NULL)Exel1->Last= getCellByPos(Exel1->Last, 0, 1);
+    while(Exel1->Last->Right!=NULL)Exel1->Last= getCellByPos(Exel1->Last, 1, 0);
     return Exel1;
 };
 
@@ -406,27 +407,43 @@ struct Exel* getExelFromFile(char* fileToGet) {
 }
 
 int sortExel(struct Exel* Exel1, int pos) {
-    struct Cell* firstCell = GetCellByPos(Exel1->First, pos, 0);
-    int i,j,g = 0;
+    struct Cell* firstCell = getCellByPos(Exel1->First->Bot, pos, 0);
+    struct Cell* CellBuf1 = firstCell;
+    int i,j,g = 0, strLen = 0;
     while (firstCell != NULL) {
         g++;
         firstCell = firstCell->Bot;
     }
-    g--;
-    firstCell = GetCellByPos(Exel1->First, pos, 0);
 
-    struct Cell* CellBuf1 = firstCell;
+    firstCell = Exel1->First;
+    while (firstCell != NULL) {
+        strLen++;
+        firstCell = firstCell->Right;
+    }
 
     for (i=0; i < g; i++) {
-        struct Cell* CellBuf2 = CellBuf1;
-        for (j = 0; j < g-i; ++j) {
+        for (j = 0; j < g-1; ++j) {
+            struct Cell* CellBuf2 = getCellByPos(CellBuf1, 0, j);
             struct Cell* CellBuf3 = CellBuf2->Bot;
             if (CellBuf3->valueType == 'i') {
-                swapCell(CellBuf2, CellBuf3);
+                if (CellBuf3->ivalue > CellBuf2->ivalue) {
+                    for (int k = 0; k < strLen; ++k) {
+                        struct Cell * CellBuf4 = getCellByPos(Exel1->First->Bot, k, j);
+                        struct Cell * CellBuf5 = CellBuf4->Bot;
+                        swapCell(CellBuf4, CellBuf5);
+
+                    }
+                }
+
             }
             else if (CellBuf3->valueType == 's' && CellBuf2->valueType == 's') {
                 if (CellBuf3->svalue == sortStrings(CellBuf2->svalue, CellBuf3->svalue)) {
-                    swapCell(CellBuf3, CellBuf2);
+                    for (int k = 0; k < strLen; ++k) {
+                        struct Cell * CellBuf4 = getCellByPos(Exel1->First->Bot, k, j);
+                        struct Cell * CellBuf5 = CellBuf4->Bot;
+                        swapCell(CellBuf4, CellBuf5);
+
+                    }
                 }
             }
 
@@ -434,14 +451,104 @@ int sortExel(struct Exel* Exel1, int pos) {
     }
 }
 
+int findByCell(struct Exel *Exel1, struct Cell *value, int column) {
+    struct Cell * CellBuf1 = Exel1->First;
+    struct Exel * ExelBuf = initExel();
+    struct Cell * CellBuf3 = ExelBuf->First;
+    int amogus = 0;
+
+    for (int i = 0; CellBuf1 != NULL; ++i, CellBuf1 = CellBuf1->Right) {
+        struct Cell * CellBuf2 = ExelBuf->First;
+        if (amogus != 0) {
+            addCollom(ExelBuf, i);
+        }
+        amogus++;
+        CellBuf2 = getCellByPos(ExelBuf->First, i, 0);
+        CellBuf2->valueType = CellBuf1->valueType;
+        if (CellBuf2->valueType == 'i') CellBuf2->ivalue = CellBuf1->ivalue;
+        if (CellBuf2->valueType == 's') {
+            CellBuf2->svalue = malloc(sizeof (struct string));
+            inits(CellBuf2->svalue, 1, ' ', ' ');
+            AddStrings(CellBuf2->svalue, CellBuf1->svalue, 0);
+            if(CellBuf1->SizeW>CellBuf2->SizeW){
+                while(CellBuf2->Top!=NULL)CellBuf2=CellBuf2->Top;
+                while(CellBuf2!=NULL){
+                    CellBuf2->SizeW = CellBuf1->SizeW;
+                    CellBuf2=CellBuf2->Bot;
+                }
+            }
+        }
+
+    }
+    CellBuf1 = getCellByPos(Exel1->First->Bot, column, 0);
+
+
+    for (int y = 0; CellBuf1 != NULL ; ++y, CellBuf1 = CellBuf1->Bot) {
+        if (CellBuf1->valueType == value->valueType) {
+            if (CellBuf1->valueType == 'i') {
+                if (CellBuf1->ivalue == value->ivalue) {
+                    addRow(ExelBuf, y);
+                    struct Cell *CellBuf2 = getCellByPos(ExelBuf->First->Bot, 0, y);
+                    struct Cell *CellBuf4 = getCellByPos(Exel1->First->Bot, 0, y);
+                    while (CellBuf4 != NULL) {
+                        CellBuf2->valueType = CellBuf4->valueType;
+                        if (CellBuf2->valueType == 'i') CellBuf2->ivalue = CellBuf4->ivalue;
+                        if (CellBuf2->valueType == 's') {
+                            CellBuf2->svalue = malloc(sizeof (struct string));
+                            inits(CellBuf2->svalue, 1, ' ', ' ');
+                            AddStrings(CellBuf2->svalue, CellBuf4->svalue, 0);
+                            if(CellBuf4->SizeW>CellBuf2->SizeW){
+                                while(CellBuf2->Top!=NULL)CellBuf2=CellBuf2->Top;
+                                while(CellBuf2!=NULL){
+                                    CellBuf2->SizeW = CellBuf4->SizeW;
+                                    CellBuf2=CellBuf2->Bot;
+                                }
+                            }
+                        }
+                        CellBuf4 = CellBuf4->Right;
+                        CellBuf2 = CellBuf2->Right;
+                    }
+                }
+            }
+            else if (CellBuf1->valueType == 's') {
+                if ((CellBuf1->svalue == sortStrings(CellBuf1->svalue,value->svalue)) && (value->svalue == sortStrings(value->svalue,CellBuf1->svalue))) {
+                    addRow(ExelBuf, y);
+                    struct Cell *CellBuf2 = getCellByPos(ExelBuf->First->Bot, 0, y);
+                    struct Cell *CellBuf4 = getCellByPos(Exel1->First->Bot, 0, y);
+                    CellBuf2->valueType = CellBuf4->valueType;
+                    if (CellBuf2->valueType == 'i') CellBuf2->ivalue = CellBuf4->ivalue;
+                    if (CellBuf2->valueType == 's') {
+                        CellBuf2->svalue = malloc(sizeof (struct string));
+                        inits(CellBuf2->svalue, 1, ' ', ' ');
+                        AddStrings(CellBuf2->svalue, CellBuf4->svalue, 0);
+                    }
+                }
+            }
+        }
+    }
+
+    printExel(ExelBuf);
+    deleteExel(ExelBuf);
+}
+
+int findByValue(struct Exel *Exel1, struct string *value, int column) {
+    struct Cell* Cell1 = initCell('n', 0, 0, 0, 0, 0, 0);
+    AddCellValue(Cell1, value);
+    findByCell(Exel1, Cell1, column);
+    deleteCell(Cell1);
+    return 0;
+}
+
+
+
 int main()
 {
     int secst = 0;
     printf("Hello in my SUBD\n");
     struct Exel* Exel1 = getExelFromFile("txt.txt");
-    while(secst!=9){
+    while(secst!=10){
         printExel(Exel1);
-        printf("Take the number of action from list:\n 1)Add a Row\n 2)Add a Collom\n 3)Set Value\n 4)Set Values\n 5)Delete a row\n 6)Delete a Collom\n 7)Save Dok\n 9)End work\n");
+        printf("Take the number of action from list:\n 1)Add a Row\n 2)Add a Collom\n 3)Set Value\n 4)Set Values\n 5)Delete a row\n 6)Delete a Collom\n 7)Save Dok\n 8)Sort by column\n 9)Find by value \n 10)End work\n");
         {
             struct string* s1;
             s1=InputString("", '/n');
@@ -476,18 +583,15 @@ int main()
             s1 = InputString("Set the number of row\n", '/n');
             Nam1 = stringToInt(s1);
             DeleteString(s1);
-            free(s1);
             s1 = InputString("Set the number of Collom\n", '/n');
             Nam2 = stringToInt(s1);
             DeleteString(s1);
-            free(s1);
             int f=0;
             while(f==0){
                 s1 = InputString("Set the value\n",' ');
-                f = AddCellValue(GetCellByPos(Exel1->First, Nam2-1, Nam1),s1);
+                f = AddCellValue(getCellByPos(Exel1->First, Nam2 - 1, Nam1), s1);
                 if(f==0){
                     DeleteString(s1);
-                    free(s1);
                 }
             }
         }
@@ -497,28 +601,24 @@ int main()
             s1=InputString("Set the row number of start Cell\n", '/n');
             Nam1 = stringToInt(s1);
             DeleteString(s1);
-            free(s1);
             s1=InputString("Set the collom number of start Cell\n", '/n');
             Nam2 = stringToInt(s1);
             DeleteString(s1);
-            free(s1);
             s1=InputString("Set the row number of end Cell\n", '/n');
             Nam3 = stringToInt(s1);
             DeleteString(s1);
-            free(s1);
             s1=InputString("Set the collom number of end Cell\n", '/n');
             Nam4 = stringToInt(s1);
             DeleteString(s1);
-            free(s1);
             for(i=Nam1;i<=Nam3;i++){
                 for(j=Nam2;j<=Nam4;j++){
                     int f=0;
                     while(f==0){
                         s1 = InputString("Set the value\n",' ');
-                        f = AddCellValue(GetCellByPos(Exel1->First, j-1, i),s1);
+                        f = AddCellValue(getCellByPos(Exel1->First, j - 1, i), s1);
                         if(f==0){
                             DeleteString(s1);
-                            free(s1);
+
                         }
                     }
 
@@ -553,9 +653,17 @@ int main()
             struct string* s1;
             s1 = InputString("Set position\n", '\0');
             int num = stringToInt(s1);
-            sortExel(Exel1, num);
+            sortExel(Exel1, num-1);
+            DeleteString(s1);
         }
-        printf("Your mas\n");
+        if (secst == 9) {
+            struct string *s1;
+            s1 = InputString("Input column\n", '\0');
+            int num = stringToInt(s1);
+            DeleteString(s1);
+            s1 = InputString("Input value\n", '\0');
+            findByValue(Exel1, s1, num-1);
+        }
     }
     printExelToFile(Exel1, "txt.txt");
     deleteExel(Exel1);
