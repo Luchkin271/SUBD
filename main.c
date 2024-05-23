@@ -487,7 +487,7 @@ int findByCell(struct Exel *Exel1, struct Cell *value, int column) {
         if (CellBuf1->valueType == value->valueType) {
             if (CellBuf1->valueType == 'i') {
                 if (CellBuf1->ivalue == value->ivalue) {
-                    addRow(ExelBuf, y);
+                    addRow(ExelBuf, y+1);
                     struct Cell *CellBuf2 = getCellByPos(ExelBuf->First->Bot, 0, y);
                     struct Cell *CellBuf4 = getCellByPos(Exel1->First->Bot, 0, y);
                     while (CellBuf4 != NULL) {
